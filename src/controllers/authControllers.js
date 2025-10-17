@@ -1,17 +1,16 @@
 const User = require('../models/user');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
+const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 
 exports.signup = async function(req, res) {
   try {
-    const { username, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const username = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+    const hashedPassword = await argon2.hash(password);
 
-    const user = new User({
-      username,
-      email,
-      passwordHash: hashedPassword
-    });
+    const user = new User({username,email,hashedPassword});
 
     await user.save();
     res.status(201).json({ message: 'User created' });
@@ -22,11 +21,12 @@ exports.signup = async function(req, res) {
 
 exports.login = async function(req, res) {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email;
+    const password = req.body.password;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'User not found' });
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    const isMatch = await argon2.verify(user.hashedPassword, password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign(
