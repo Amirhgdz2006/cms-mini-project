@@ -2,40 +2,35 @@ const Content = require('../models/contentModel');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+// async function findUserByToken(req, res) {
+//   try {
+//     const token = req.cookies.token;
 
-async function findUserByToken(req, res) {
-  try {
-    const token = req.cookies.token;
+//     if (!token) {
+//       return res.status(401).json({ "message": "Unauthorized: No token found" })
+//     }
 
-    if (!token) {
-      return res.status(401).json({ "message": "Unauthorized: No token found" })
-    }
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     if (!decoded) {
+//       return res.status(401).json({ "message": "Invalid token" })
+//     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      return res.status(401).json({ "message": "Invalid token" })
-    }
+//     const user = await User.findById(decoded.id)
+//     if (!user) {
+//       return res.status(404).json({ "message": "User not found" })
+//     }
 
-    const user = await User.findById(decoded.id)
-    if (!user) {
-      return res.status(404).json({ "message": "User not found" })
-    }
+//     return user;
 
-    return user;
-
-  }
-  catch (error) {
-    res.status(400).json({ "error": error.message })
-  }
-}
+//   }
+//   catch (error) {
+//     res.status(400).json({ "error": error.message })
+//   }
+// }
 
 // Create
 exports.createContent = async function (req, res) {
   try {
-    const user = await findUserByToken(req, res);
-    if (!user) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
     var data = req.body;
     if (req.user) {
       if (req.user.id) {
@@ -57,10 +52,6 @@ exports.createContent = async function (req, res) {
 // Read one (by id or slug)
 exports.getContent = async function (req, res) {
   try {
-    const user = await findUserByToken(req, res);
-    if (!user) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
     const { slug } = req.params;
     const content = await Content.findOne({ slug })
     if (!content) return res.status(404).json({ message: 'No content found for the provided slug' });
@@ -73,11 +64,6 @@ exports.getContent = async function (req, res) {
 // Update
 exports.updateContent = async function (req, res) {
   try {
-    const user = await findUserByToken(req, res);
-
-    if (user.role !== 'editor' && user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied: You are not allowed to update content' });
-    }
     const { slug } = req.params;
     const content = await Content.findOneAndUpdate({ slug }, req.body, { new: true });
 
@@ -91,10 +77,6 @@ exports.updateContent = async function (req, res) {
 // Delete
 exports.deleteContent = async function (req, res) {
   try {
-    const user = await findUserByToken(req, res);
-    if (user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied: You are not allowed to delete content' });
-    }
     const { slug } = req.params;
     const content = await Content.findOneAndDelete({slug});
     if (!content) return res.status(404).json({ message: 'No content found for the provided slug' });
