@@ -32,7 +32,7 @@ async function initApp() {
 initApp();
 
 app.use('/api/auth', authRoutes);
-app.use('/api/content-types', contentTypeRoutes);
+app.use('/api/content-type', contentTypeRoutes);
 app.use('/api/content', contentRoutes);
 
 

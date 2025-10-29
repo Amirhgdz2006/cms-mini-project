@@ -2,9 +2,8 @@ const { dynamicModels } = require('../utils/loadDynamicModels');
 
 
 function getModel(type) {
-  const normalized = type.charAt(0).toUpperCase() + type.slice(1);
-  const model = dynamicModels[normalized];
-  if (!model) throw new Error(`Model '${normalized}' not found. Make sure the ContentType exists and is loaded.`);
+  const model = dynamicModels[type];
+  if (!model) throw new Error(`Model '${type}' not found. Make sure the ContentType exists and is loaded.`);
   return model;
 }
 

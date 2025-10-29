@@ -1,95 +1,105 @@
-#######Packages:
-1. argon2
-Purpose: Hashing and verifying user passwords
-Alternatives: bcrypt
-Advantages:
-Very secure, especially against modern hardware attacks
-Recommended as a modern standard for password hashing
-Disadvantages:
-Newer library, smaller community compared to bcrypt
-Decision:
-(argon2) was chosen for its superior security and resistance to modern attacks, while still providing a relatively simple implementation for password hashing and verification
-
-2. body-parser
-Purpose: Parsing request bodies in Express applications
-Alternatives: Built-in express.json()
-Advantages:
-Provides explicit configuration and control over body parsing
-Backward compatible with older Express versions
-Disadvantages:
-No longer necessary in modern Express (v4.16+)
-Adds a minor layer of redundancy
-Decision:
- Kept for compatibility and clarity, though it may be removed later in refactoring
-
-3. dotenv
-Purpose: Managing environment variables from a .env file
- Alternatives: env-cmd
-Advantages:
-Lightweight and easy to us
-Framework-agnostic
-Improves security by separating sensitive data
-Disadvantages:
-Only works during runtime (not build-time)
-Minimal validation of variables
-Decision:
-(dotenv) was chosen for its simplicity and reliability in managing environment configurations
-
-4. jsonwebtoken
-Purpose: Handling authentication through JWT tokens
- Alternatives: jose
-Advantages:
-Lightweight and straightforward
-Works perfectly with Express middleware
-Great documentation and maintenance
-Disadvantages:
-Only handles token generation/verification, not full auth flow
-Limited built-in security options
-Decision:
-(jsonwebtoken) Chosen for implementing a simple and efficient authentication system using JWTs
-
-5. mongoose
-Purpose: Object Data Modeling (ODM) library for MongoDB
- Alternatives: Prisma
-Advantages:
-Mature and stable ODM library
-Great for schema-based data modeling
-Wide community support and documentation
-Disadvantages:
-Moderate TypeScript support compared to Prisma
-Slight learning curve for advanced queries
-Decision:
-(mongoose) was chosen due to its mature ecosystem, schema-based modeling, and ease of integration with Express.
-
-6. nodemon
-Purpose: Automatically restarts the server during development when files change
- Alternatives: ts-node-dev
-Advantages:
-Simple and lightweight
-Easy to set up
-Improves development workflow
-Disadvantages:
-Not suitable for production environments
-Can cause memory leaks in large projects
-Decision:
- (nodemon) used as a development tool for faster iteration during local testing
+##example of using this headless cms:
 
 
+1- signup (http://localhost:5000/api/auth/signup)
+raw-body:
+{
+    "username":"example",
+    "email":"example@gmail.com",
+    "password":"example"
+}
 
-#################
+output:
+{
+    "message": "Your account has been created successfully"
+}
 
 
+#------------------------------------------------------#
 
-#######Frame works:
-1. express
-Purpose: Core backend framework for building REST APIs
- Alternatives: Fastify
-Advantages:
-Extremely simple and flexible
-Huge ecosystem and community support
-Fast development for MVPs
-Disadvantages:
-Requires manual structure and organization
-Slightly slower than Fastify in performance tests
-Decision:
-(express) was selected for its simplicity, huge ecosystem, and team familiarity — perfect for building an MVP quickly
+
+2- login (http://localhost:5000/api/auth/login)
+raw-body:
+{
+    "email":"example@gmail.com",
+    "password":"example"
+}
+
+output:
+{
+    "message": "You’ve successfully logged in"
+}
+
+
+#------------------------------------------------------#
+
+3- creating content type (http://localhost:5000/api/content-type)
+raw-body:(example)
+{
+  "name": "article",
+  "fields": [
+    { "name": "title", "type": "string", "required": true },
+    { "name": "slug", "type": "string", "required": true, "unique": true },
+    { "name": "body", "type": "text", "required": false }
+  ]
+}
+
+output:
+{
+    "message": "article model created successfully",
+    "contentType": {
+        "name": "article",
+        "fields": [
+            {
+                "name": "title",
+                "type": "string",
+                "required": true,
+                "unique": false,
+                "_id": "6901edb89209579f66235c45"
+            },
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "unique": true,
+                "_id": "6901edb89209579f66235c46"
+            },
+            {
+                "name": "body",
+                "type": "text",
+                "required": false,
+                "unique": false,
+                "_id": "6901edb89209579f66235c47"
+            }
+        ],
+        "_id": "6901edb89209579f66235c44",
+        "createdAt": "2025-10-29T10:34:32.883Z",
+        "__v": 0
+    }
+}
+
+
+#------------------------------------------------------#
+
+
+4- creating content (http://localhost:5000/api/content/{content-type}) example --> article
+raw-body:(example)
+{
+  "title": "Dark Cat",
+  "slug": "dark-cat",
+  "body": "This is a mysterious article about a dark cat."
+}
+
+
+output:
+{
+    "message": "article created successfully",
+    "record": {
+        "title": "Dark Cat",
+        "slug": "dark-cat",
+        "body": "This is a mysterious article about a dark cat.",
+        "_id": "6901ee2e9209579f66235c4b",
+        "createdAt": "2025-10-29T10:36:30.807Z",
+        "__v": 0
+    }
+}

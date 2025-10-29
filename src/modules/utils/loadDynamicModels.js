@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const ContentType = require('../models/contentTypeModel');
 
-const dynamicModels = {}; // shared object
+const dynamicModels = {};
 
 function createDynamicSchema(fields) {
   const schemaDefinition = {};

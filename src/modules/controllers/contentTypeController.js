@@ -27,7 +27,8 @@ function createDynamicSchema(fields) {
 // Create ContentType
 exports.createContentType = async function(req, res) {
   try {
-    const { name, fields } = req.body;
+    const name = req.body.name;
+    const fields = req.body.fields;
 
     if (dynamicModels[name] || mongoose.connection.models[name]) {
       return res.status(400).json({ message: 'Content type already exists' });
@@ -39,6 +40,17 @@ exports.createContentType = async function(req, res) {
     dynamicModels[name] = mongoose.model(name, schema);
 
     res.status(201).json({ message: `${name} model created successfully`, contentType });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+// Read All ContentTypes
+exports.getAllContentTypes = async function(req, res) {
+  try {
+    const contentTypes = await ContentType.find();
+    res.json(contentTypes);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -91,12 +103,3 @@ exports.deleteContentType = async function(req, res) {
   }
 };
 
-// Read All ContentTypes
-exports.getAllContentTypes = async function(req, res) {
-  try {
-    const contentTypes = await ContentType.find();
-    res.json(contentTypes);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
