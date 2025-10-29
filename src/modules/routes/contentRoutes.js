@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const contentCtrl = require('../controllers/contentController');
+const ctrl = require('../controllers/contentController');
 const { authenticateUser } = require('../../core/middleware/authMiddleware');
 const { authorizeRoles } = require('../../core/middleware/roleMiddleware');
 
+router.get('/:type', authenticateUser, ctrl.getAllRecords);
+router.get('/:type/:id', authenticateUser, ctrl.getRecordById);
 
-router.post('/', authenticateUser, authorizeRoles('editor', 'admin'), contentCtrl.createContent);
-router.get('/:slug', authenticateUser, contentCtrl.getContent);
-router.put('/:slug', authenticateUser, authorizeRoles('editor', 'admin'), contentCtrl.updateContent);
-router.delete('/:slug', authenticateUser, authorizeRoles('admin'), contentCtrl.deleteContent);
+router.post('/:type', authenticateUser, authorizeRoles('admin', 'editor'), ctrl.createRecord);
+router.put('/:type/:id', authenticateUser, authorizeRoles('admin', 'editor'), ctrl.updateRecord);
+router.delete('/:type/:id', authenticateUser, authorizeRoles('admin'), ctrl.deleteRecord);
 
 module.exports = router;

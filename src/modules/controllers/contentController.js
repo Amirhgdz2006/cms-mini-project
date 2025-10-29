@@ -1,86 +1,82 @@
-const Content = require('../models/contentModel');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const { dynamicModels } = require('../utils/loadDynamicModels');
 
-// async function findUserByToken(req, res) {
-//   try {
-//     const token = req.cookies.token;
 
-//     if (!token) {
-//       return res.status(401).json({ "message": "Unauthorized: No token found" })
-//     }
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     if (!decoded) {
-//       return res.status(401).json({ "message": "Invalid token" })
-//     }
-
-//     const user = await User.findById(decoded.id)
-//     if (!user) {
-//       return res.status(404).json({ "message": "User not found" })
-//     }
-
-//     return user;
-
-//   }
-//   catch (error) {
-//     res.status(400).json({ "error": error.message })
-//   }
-// }
-
-// Create
-exports.createContent = async function (req, res) {
-  try {
-    var data = req.body;
-    if (req.user) {
-      if (req.user.id) {
-        data.createBy = req.user.id
-      }
-      else if (req.user._id) {
-        data.createBy = req.user._id
-      }
-    }
-    var content = await Content.create(data)
-    res.status(200).json(content)
-  }
-  catch (error) {
-    res.status(400).json({ error: error.message })
-  }
+function getModel(type) {
+  const normalized = type.charAt(0).toUpperCase() + type.slice(1);
+  const model = dynamicModels[normalized];
+  if (!model) throw new Error(`Model '${normalized}' not found. Make sure the ContentType exists and is loaded.`);
+  return model;
 }
 
-
-// Read one (by id or slug)
-exports.getContent = async function (req, res) {
+// Create 
+exports.createRecord = async function(req, res) {
   try {
-    const { slug } = req.params;
-    const content = await Content.findOne({ slug })
-    if (!content) return res.status(404).json({ message: 'No content found for the provided slug' });
-    res.json(content);
+    const { type } = req.params;
+    const model = getModel(type);
+
+    const data = { ...req.body };
+    if (req.user && req.user._id) data.createdBy = req.user._id;
+
+    const record = await model.create(data);
+    res.status(201).json({ message: `${type} created successfully`, record });
   } catch (err) {
-    res.status(500).json({ "error": err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Update
-exports.updateContent = async function (req, res) {
+// Read All 
+exports.getAllRecords = async function(req, res) {
   try {
-    const { slug } = req.params;
-    const content = await Content.findOneAndUpdate({ slug }, req.body, { new: true });
+    const { type } = req.params;
+    const model = getModel(type);
 
-    if (!content) return res.status(404).json({ message: 'No content found for the provided slug' });
-    res.json(content);
+    const records = await model.find().sort({ createdAt: -1 });
+    res.json(records);
   } catch (err) {
-    res.status(400).json({ "error": err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Delete
-exports.deleteContent = async function (req, res) {
+// Read One 
+exports.getRecordById = async function(req, res) {
   try {
-    const { slug } = req.params;
-    const content = await Content.findOneAndDelete({slug});
-    if (!content) return res.status(404).json({ message: 'No content found for the provided slug' });
-    res.json({ message: 'Content deleted successfully' });
+    const { type, id } = req.params;
+    const model = getModel(type);
+
+    const record = await model.findById(id);
+    if (!record) return res.status(404).json({ message: 'Record not found' });
+
+    res.json(record);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update 
+exports.updateRecord = async function(req, res) {
+  try {
+    const { type, id } = req.params;
+    const model = getModel(type);
+
+    const updated = await model.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: 'Record not found' });
+
+    res.json({ message: `${type} updated successfully`, updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Delete 
+exports.deleteRecord = async function(req, res) {
+  try {
+    const { type, id } = req.params;
+    const model = getModel(type);
+
+    const deleted = await model.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'Record not found' });
+
+    res.json({ message: `${type} deleted successfully` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
