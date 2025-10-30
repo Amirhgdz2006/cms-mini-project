@@ -34,8 +34,8 @@ async function loadDynamicModels() {
       dynamicModels[type.name] = model;
       console.log(`Loaded dynamic model: ${type.name}`);
     }
-  } catch (err) {
-    console.error('Failed to load dynamic models:', err.message);
+  } catch (error) {
+    console.error('Failed to load dynamic models:', error.message);
   }
 }
 

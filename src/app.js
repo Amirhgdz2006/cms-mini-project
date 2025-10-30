@@ -4,11 +4,9 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const db = require('./config/db');
-
 const authRoutes = require('./modules/routes/auth');
 const contentTypeRoutes = require('./modules/routes/contentTypeRoutes');
 const contentRoutes = require('./modules/routes/contentRoutes')
-
 const { loadDynamicModels } = require('./modules/utils/loadDynamicModels');
 
 const app = express();
@@ -20,8 +18,6 @@ app.use(cookieParser());
 async function initApp() {
   try {
     await db.connectDB();
-    console.log('MongoDB connected');
-
     await loadDynamicModels();
     console.log('Dynamic models loaded successfully');
   } catch (error) {
